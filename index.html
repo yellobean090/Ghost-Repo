@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GHOST TERMINAL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --accent:#00ff41;
+    --accent-dim:#00b32d;
+    --accent-dark:#003d0f;
+    --amber:#ffb700;--red:#ff3232;--bg:#0a0a0a;--border:#1a3d1a;
+  }
+  html,body{
+    height:100%;background:#000;color:var(--accent);
+    font-family:'Share Tech Mono',monospace;overflow:hidden;
+  }
+  #root{
+    display:flex;flex-direction:column;height:100vh;
+    background:var(--bg);border:1px solid var(--accent-dark);position:relative;
+  }
+  #scanlines{
+    position:absolute;inset:0;pointer-events:none;z-index:10;
+    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);
+  }
+  #titlebar{
+    background:#0d1a0d;border-bottom:1px solid var(--border);
+    padding:7px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;
+  }
+  .dot{width:10px;height:10px;border-radius:50%}
+  .dot.r{background:#ff3b30}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+  #titlebar span{flex:1;text-align:center;font-size:11px;color:var(--accent-dim);letter-spacing:2px}
+
+  /* colour picker row */
+  #colorbar{
+    background:#060d06;border-bottom:1px solid var(--border);
+    padding:5px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;
+  }
+  #colorbar label{font-size:10px;color:#2a5a2a;letter-spacing:1px}
+  .cswatch{
+    width:14px;height:14px;border-radius:50%;cursor:pointer;
+    border:2px solid transparent;transition:border-color .15s;
+  }
+  .cswatch.active{border-color:#fff;}
+  .cswatch:hover{border-color:#aaa;}
+
+  #screen{
+    flex:1;padding:14px 16px;overflow-y:auto;font-size:13px;
+    line-height:1.7;scroll-behavior:smooth;
+  }
+  #screen::-webkit-scrollbar{width:4px}
+  #screen::-webkit-scrollbar-thumb{background:var(--accent-dark)}
+  .line{margin:1px 0;white-space:pre-wrap;word-break:break-all;animation:fi .2s ease}
+  @keyframes fi{from{opacity:0;transform:translateX(-3px)}to{opacity:1;transform:none}}
+  .sys{color:var(--accent-dim)}
+  .err{color:var(--red)}
+  .warn{color:var(--amber)}
+  .me{color:var(--accent)}
+  .them{color:#7fff7f}
+  .dim{color:#1e3d1e}
+  .info{color:#00ccff}
+  .srv{color:#888}
+
+  /* typing indicator */
+  #typing-indicator{
+    min-height:18px;padding:0 16px 2px;font-size:11px;
+    color:var(--accent-dim);letter-spacing:1px;flex-shrink:0;
+    transition:opacity .2s;
+  }
+  #typing-indicator.hidden{opacity:0;}
+
+  #inputbar{
+    border-top:1px solid var(--border);background:#0d1a0d;
+    padding:9px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0;
+  }
+  #prompt{color:var(--accent-dim);font-size:13px;white-space:nowrap;min-width:fit-content}
+  #cmd{
+    flex:1;background:transparent;border:none;outline:none;
+    color:var(--accent);font-family:'Share Tech Mono',monospace;
+    font-size:13px;caret-color:var(--accent);
+  }
+  #cmd:disabled{opacity:.4}
+  #statusbar{
+    border-top:1px solid var(--border);background:#060d06;
+    padding:4px 14px;display:flex;justify-content:space-between;
+    align-items:center;font-size:10px;color:#2a5a2a;flex-shrink:0;
+  }
+  .led{width:6px;height:6px;border-radius:50%;background:#2a5a2a;display:inline-block;margin-right:5px}
+  .led.on{background:var(--accent)}
+  .led.warn{background:var(--amber)}
+  .led.err{background:var(--red)}
+  #server-input-wrap{
+    display:flex;align-items:center;gap:8px;
+    background:#0d1a0d;border:1px solid var(--border);
+    padding:8px 12px;border-radius:3px;margin:8px 0;
+  }
+  #server-input-wrap input{
+    flex:1;background:transparent;border:none;outline:none;
+    color:var(--amber);font-family:'Share Tech Mono',monospace;font-size:13px;
+  }
+  #server-input-wrap label{color:var(--accent-dim);font-size:12px;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="root">
+  <div id="scanlines"></div>
+  <div id="titlebar">
+    <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+    <span>GHOST TERMINAL v2.1 — LIVE RELAY</span>
+  </div>
+
+  <!-- colour picker -->
+  <div id="colorbar">
+    <label>THEME:</label>
+    <div class="cswatch active" data-color="green"  title="Green"  style="background:#00ff41"></div>
+    <div class="cswatch"        data-color="red"    title="Red"    style="background:#ff3232"></div>
+    <div class="cswatch"        data-color="pink"   title="Pink"   style="background:#ff69b4"></div>
+    <div class="cswatch"        data-color="blue"   title="Blue"   style="background:#00bfff"></div>
+    <div class="cswatch"        data-color="orange" title="Orange" style="background:#ff8c00"></div>
+    <div class="cswatch"        data-color="yellow" title="Yellow" style="background:#ffe600"></div>
+  </div>
+
+  <div id="screen"></div>
+
+  <!-- typing indicator sits just above the input bar -->
+  <div id="typing-indicator" class="hidden"></div>
+
+  <div id="inputbar">
+    <span id="prompt">ghost:~$</span>
+    <input id="cmd" autocomplete="off" autocorrect="off" spellcheck="false" />
+  </div>
+  <div id="statusbar">
+    <span><span class="led" id="led"></span><span id="status-txt">OFFLINE</span></span>
+    <span id="clock"></span>
+    <span>EPHEMERAL · NO LOGS · E2E</span>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const DEFAULT_SERVER = "wss://mayflower-spry-grudging.ngrok-free.dev";
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─── COLOUR THEMES ────────────────────────────────────────────────────────────
+const THEMES = {
+  green:  { accent:"#00ff41", dim:"#00b32d", dark:"#003d0f" },
+  red:    { accent:"#ff3232", dim:"#b32020", dark:"#3d0000" },
+  pink:   { accent:"#ff69b4", dim:"#c2487e", dark:"#3d0020" },
+  blue:   { accent:"#00bfff", dim:"#0080b3", dark:"#00233d" },
+  orange: { accent:"#ff8c00", dim:"#b36200", dark:"#3d1e00" },
+  yellow: { accent:"#ffe600", dim:"#b3a000", dark:"#3d3600" },
+};
+
+function applyTheme(name){
+  const t = THEMES[name] || THEMES.green;
+  const r = document.documentElement.style;
+  r.setProperty("--accent",      t.accent);
+  r.setProperty("--accent-dim",  t.dim);
+  r.setProperty("--accent-dark", t.dark);
+  document.querySelectorAll(".cswatch").forEach(s=>{
+    s.classList.toggle("active", s.dataset.color === name);
+  });
+}
+
+document.querySelectorAll(".cswatch").forEach(s=>{
+  s.addEventListener("click", ()=> applyTheme(s.dataset.color));
+});
+// ─────────────────────────────────────────────────────────────────────────────
+
+const screen   = document.getElementById('screen');
+const cmdEl    = document.getElementById('cmd');
+const prompt   = document.getElementById('prompt');
+const led      = document.getElementById('led');
+const stTxt    = document.getElementById('status-txt');
+const clock    = document.getElementById('clock');
+const typingEl = document.getElementById('typing-indicator');
+
+let ws = null;
+let state = "setup"; // setup | auth_user | auth_pass | chat
+let pendingUser = null;
+let myAlias = null;
+let inputLocked = false;
+
+// typing state
+let typingTimeout  = null;  // debounce before sending "stopped"
+let partnerTimeout = null;  // auto-hide partner indicator after 3 s
+
+setInterval(()=>{ clock.textContent = new Date().toUTCString().replace('GMT','UTC'); }, 1000);
+
+function setLed(mode){ led.className = 'led'+(mode?' '+mode:''); }
+function setStatus(txt, mode=""){ stTxt.textContent=txt; setLed(mode); }
+
+function print(text, cls="line", prepend=""){
+  const d = document.createElement('div');
+  d.className = 'line '+(cls||'');
+  d.textContent = prepend+text;
+  screen.appendChild(d);
+  screen.scrollTop = screen.scrollHeight;
+  return d;
+}
+
+function ts(){
+  return new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+function lock(){ inputLocked=true; cmdEl.disabled=true; }
+function unlock(){ inputLocked=false; cmdEl.disabled=false; cmdEl.focus(); }
+
+// ── TYPING INDICATOR HELPERS ──────────────────────────────────────────────────
+function showPartnerTyping(alias){
+  typingEl.textContent = alias + " is typing...";
+  typingEl.classList.remove("hidden");
+  clearTimeout(partnerTimeout);
+  partnerTimeout = setTimeout(hidePartnerTyping, 3000);
+}
+
+function hidePartnerTyping(){
+  typingEl.classList.add("hidden");
+  clearTimeout(partnerTimeout);
+}
+
+function sendTyping(){
+  if(!ws || ws.readyState !== 1 || state !== "chat") return;
+  ws.send(JSON.stringify({ type:"typing", typing:true }));
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(()=>{
+    if(ws && ws.readyState === 1)
+      ws.send(JSON.stringify({ type:"typing", typing:false }));
+  }, 1500);
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+(function boot(){
+  const lines = [
+    ["",""],
+    ["  ░██████╗░██╗  ██╗░█████╗░░██████╗████████╗","dim"],
+    ["  ██╔════╝░██║  ██║██╔══██╗██╔════╝╚══██╔══╝","dim"],
+    ["  ██║░░██╗░███████║██║░░██║╚█████╗░░░░██║░░░","me"],
+    ["  ██║░░╚██╗██╔══██║██║░░██║░╚═══██╗░░░██║░░░","me"],
+    ["  ╚██████╔╝██║  ██║╚█████╔╝██████╔╝░░░██║░░░","dim"],
+    ["  ░╚═════╝░╚═╝  ╚═╝░╚════╝ ╚═════╝ ░░░╚═╝░░░","dim"],
+    ["",""],
+    ["  ANONYMOUS RELAY TERMINAL  v2.1  LIVE MODE","sys"],
+    ["  All messages ephemeral. No history. No logs.","sys"],
+    ["",""],
+  ];
+  lines.forEach(([t,c])=>print(t,c));
+
+  if(DEFAULT_SERVER){
+    print("  Server configured: "+DEFAULT_SERVER, "sys");
+    print("","");
+    connectToServer(DEFAULT_SERVER);
+  } else {
+    print("  No server URL configured.","warn");
+    print("  Enter the WebSocket server URL below.","sys");
+    print("  Example: wss://abc123.ngrok-free.app","dim");
+    print("","");
+    prompt.textContent = "server-url:";
+    state = "setup";
+    cmdEl.placeholder = "paste your ngrok wss:// URL here";
+    unlock();
+  }
+})();
+
+// ── WEBSOCKET ─────────────────────────────────────────────────────────────────
+function connectToServer(url){
+  lock();
+  setStatus("CONNECTING...", "warn");
+  print("  Connecting to relay...","sys");
+
+  try { ws = new WebSocket(url); } catch(e){
+    print("  Invalid URL: "+e.message,"err");
+    state="setup"; prompt.textContent="server-url:";
+    unlock(); return;
+  }
+
+  ws.onopen = ()=>{
+    setStatus("RELAY REACHED","warn");
+    print("  Relay connected. Enter your username.","sys");
+    print("  Users: ghost_alpha · ghost_beta","warn");
+    print("","");
+    state = "auth_user";
+    prompt.textContent = "login:";
+    cmdEl.placeholder = "username";
+    unlock();
+  };
+
+  ws.onmessage = (e)=>{
+    let msg; try{ msg=JSON.parse(e.data); }catch{ return; }
+
+    if(msg.type==="auth_ok"){
+      myAlias = msg.alias;
+      setStatus("AUTHENTICATED · "+myAlias,"warn");
+      state="chat";
+      prompt.textContent = myAlias+"@ghost:~$";
+      cmdEl.placeholder = "type a message...";
+      cmdEl.type="text";
+      print("  ✓ Identity verified — you are: "+myAlias,"info");
+      unlock();
+    }
+    else if(msg.type==="auth_fail"){
+      print("  ✗ AUTH FAILED: "+msg.reason,"err");
+      state="auth_user"; prompt.textContent="login:";
+      cmdEl.type="text"; cmdEl.placeholder="username";
+      unlock();
+    }
+    else if(msg.type==="sys"){
+      print("  ⬡ "+msg.text,"srv");
+      if(msg.text.includes("joined")||msg.text.includes("already here")){
+        setStatus("CONNECTED · "+myAlias+" · partner online","on");
+      }
+      if(msg.text.includes("left")){
+        setStatus("CONNECTED · "+myAlias+" · partner offline","warn");
+        hidePartnerTyping();
+      }
+    }
+    else if(msg.type==="msg"){
+      hidePartnerTyping();
+      print(`[${ts()}] <${msg.alias}> ${msg.text}`,"them");
+    }
+    else if(msg.type==="msg_sent"){
+      // already echoed locally
+    }
+    else if(msg.type==="typing"){
+      if(msg.typing) showPartnerTyping(msg.alias);
+      else hidePartnerTyping();
+    }
+  };
+
+  ws.onclose = ()=>{
+    setStatus("DISCONNECTED","err");
+    if(state==="chat"){
+      print("  [CONNECTION LOST — session terminated]","err");
+    }
+    hidePartnerTyping();
+    state="setup"; ws=null;
+    prompt.textContent="server-url:";
+    cmdEl.placeholder="paste your ngrok wss:// URL";
+    unlock();
+  };
+
+  ws.onerror = ()=>{
+    print("  [RELAY ERROR — check URL or server status]","err");
+  };
+}
+
+// ── INPUT ─────────────────────────────────────────────────────────────────────
+cmdEl.addEventListener('input', ()=>{
+  if(state === "chat") sendTyping();
+});
+
+cmdEl.addEventListener('keydown', e=>{
+  if(e.key!=='Enter') return;
+  const val = cmdEl.value.trim();
+  cmdEl.value = '';
+  if(!val || inputLocked) return;
+
+  if(state==="setup"){
+    const url = val.startsWith("wss://")||val.startsWith("ws://") ? val : "wss://"+val;
+    connectToServer(url);
+    return;
+  }
+
+  if(state==="auth_user"){
+    pendingUser = val;
+    state = "auth_pass";
+    prompt.textContent = "password:";
+    cmdEl.type = "password";
+    cmdEl.placeholder = "passphrase";
+    print("  Sending credentials...","sys");
+    return;
+  }
+
+  if(state==="auth_pass"){
+    cmdEl.type = "text";
+    if(!ws||ws.readyState!==1){
+      print("  [NOT CONNECTED]","err"); state="setup";
+      prompt.textContent="server-url:"; return;
+    }
+    ws.send(JSON.stringify({type:"auth", username:pendingUser, password:val}));
+    pendingUser=null;
+    return;
+  }
+
+  if(state==="chat"){
+    // immediately signal "stopped typing" on Enter
+    clearTimeout(typingTimeout);
+    if(ws && ws.readyState===1)
+      ws.send(JSON.stringify({ type:"typing", typing:false }));
+
+    if(val==="/quit"){
+      ws && ws.close();
+      print("  [SESSION TERMINATED]","err");
+      setStatus("OFFLINE");
+      state="setup"; prompt.textContent="server-url:";
+      return;
+    }
+    if(val==="/clear"){ screen.innerHTML=''; return; }
+    if(val.startsWith("/")){
+      print("  Commands: /quit  /clear","warn"); return;
+    }
+    if(!ws||ws.readyState!==1){
+      print("  [NOT CONNECTED — reconnect first]","err"); return;
+    }
+    ws.send(JSON.stringify({type:"chat", text:val}));
+    print(`[${ts()}] <${myAlias}> ${val}`,"me");
+  }
+});
+
+window.addEventListener('beforeunload',()=>{ ws&&ws.close(); });
+</script>
+</body>
+</html>

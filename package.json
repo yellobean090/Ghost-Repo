@@ -1,0 +1,12 @@
+{
+  "name": "ghost-terminal-server",
+  "version": "1.0.0",
+  "description": "Anonymous ephemeral WebSocket chat relay",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  }
+}
