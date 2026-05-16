@@ -228,7 +228,7 @@ For production usage consider adding:
 
 ## Login Screen
 
-![Login](./assets/login.png)
+![Login](./assets/preview-1.png)
 
 ---
 
@@ -240,7 +240,7 @@ For production usage consider adding:
 
 ## Theme Switching
 
-![Themes](./assets/themes.png)
+![Themes](./assets/preview-2.png)
 
 ---
 
