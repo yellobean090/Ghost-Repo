@@ -1,4 +1,4 @@
-# 👻 GHOST TERMINAL
+# GHOST TERMINAL
 
 > Anonymous real-time terminal-style chat relay built with WebSockets.
 
@@ -10,7 +10,7 @@
 
 ---
 
-## ✨ Preview
+## Preview
 
 > Replace these image links with actual screenshots of your website.
 
@@ -28,32 +28,32 @@
 
 ---
 
-# 🧠 About
+# About
 
 **GHOST TERMINAL** is an anonymous encrypted-style terminal chat application inspired by hacker aesthetics and retro relay systems.
 
 It provides:
 
-- ⚡ Real-time WebSocket communication
-- 👤 Anonymous dual-user sessions
-- 🖥️ Terminal-style interface
-- 🎨 Multiple neon themes
-- ⌨️ Typing indicators
-- 🔒 Ephemeral conversations
-- 🚫 No message history
-- 🌐 Lightweight deployment
+-  Real-time WebSocket communication
+-  Anonymous dual-user sessions
+-  Terminal-style interface
+-  Multiple neon themes
+-  Typing indicators
+-  Ephemeral conversations
+-  No message history
+-  Lightweight deployment
 
 ---
 
-# 🚀 Features
+#  Features
 
-## 💬 Real-Time Messaging
+## Real-Time Messaging
 
 Instant low-latency communication using WebSockets.
 
 ---
 
-## 🎨 Dynamic Themes
+## Dynamic Themes
 
 Users can switch between multiple terminal themes:
 
@@ -66,19 +66,19 @@ Users can switch between multiple terminal themes:
 
 ---
 
-## ⌨️ Typing Indicators
+##  Typing Indicators
 
 See when the other user is typing in real time.
 
 ---
 
-## 🔐 Authentication System
+##  Authentication System
 
 Simple secure login system using predefined credentials.
 
 ---
 
-## 🧹 Terminal Commands
+##  Terminal Commands
 
 | Command | Description |
 |---|---|
@@ -87,7 +87,7 @@ Simple secure login system using predefined credentials.
 
 ---
 
-## 🕶️ Hacker UI
+##  Hacker UI
 
 Built with:
 
@@ -99,7 +99,7 @@ Built with:
 
 ---
 
-# 🏗️ Tech Stack
+#  Tech Stack
 
 ## Frontend
 
@@ -119,7 +119,7 @@ Built with:
 
 ---
 
-# 📂 Project Structure
+#  Project Structure
 
 ```bash
 ghost-terminal/
@@ -137,9 +137,9 @@ ghost-terminal/
 
 ---
 
-# ⚙️ Installation
+#  Installation
 
-## 1️⃣ Clone Repository
+## Clone Repository
 
 ```bash
 git clone https://github.com/yourusername/ghost-terminal.git
@@ -148,7 +148,7 @@ cd ghost-terminal
 
 ---
 
-## 2️⃣ Install Dependencies
+## Install Dependencies
 
 ```bash
 npm install
@@ -156,7 +156,7 @@ npm install
 
 ---
 
-## 3️⃣ Start Server
+## Start Server
 
 ```bash
 npm run dev
@@ -170,7 +170,7 @@ http://localhost:3001
 
 ---
 
-# 🌐 Deployment
+#  Deployment
 
 ## Deploy Frontend on Vercel
 
@@ -192,7 +192,7 @@ You can deploy the Node.js WebSocket server on:
 
 ---
 
-# 🔌 WebSocket Configuration
+#  WebSocket Configuration
 
 Inside `index.html`:
 
@@ -204,7 +204,7 @@ Replace with your actual backend URL.
 
 ---
 
-# 🔒 Security Notes
+#  Security Notes
 
 This project is designed for lightweight anonymous chatting.
 
@@ -224,7 +224,7 @@ For production usage consider adding:
 
 ---
 
-# 📸 Screenshots
+#  Screenshots
 
 ## Login Screen
 
@@ -244,7 +244,7 @@ For production usage consider adding:
 
 ---
 
-# 🧪 Example Credentials
+#  Default Credentials
 
 ```txt
 Username: ghost_alpha
@@ -256,9 +256,9 @@ Password: beta@3382
 
 ---
 
-# 🛠️ Built With Love By
+#  Built With Love By
 
-## Shaurya Rao
+## Shaurya
 
 > “All messages ephemeral. No history. No logs.”
 
@@ -277,13 +277,13 @@ Password: beta@3382
 
 ---
 
-# 📜 License
+#  License
 
 MIT License
 
 ---
 
-# 💀 Final Words
+#  Final Words
 
 ```txt
 CONNECTED TO RELAY...
