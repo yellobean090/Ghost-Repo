@@ -142,7 +142,7 @@ ghost-terminal/
 ## Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/ghost-terminal.git
+git clone https://github.com/yellobean090/ghost-terminal.git
 cd ghost-terminal
 ```
 
