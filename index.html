@@ -56,7 +56,7 @@
   <div id="statusbar"><span><span class="led" id="led"></span><span id="status-txt">OFFLINE</span></span><span id="clock"></span><span class="status-extra">EPHEMERAL · NO SERVER LOGS</span></div>
 </div>
 <script>
-const DEFAULT_SERVER = "wss://violable-miller-compressively.ngrok-free.dev";
+const DEFAULT_SERVER = "wss://https://ghost-relay-r3a6.onrender.com";
 const THEMES={green:{accent:"#00ff41",dim:"#00b32d",dark:"#003d0f"},red:{accent:"#ff3232",dim:"#b32020",dark:"#3d0000"},pink:{accent:"#ff69b4",dim:"#c2487e",dark:"#3d0020"},blue:{accent:"#00bfff",dim:"#0080b3",dark:"#00233d"},orange:{accent:"#ff8c00",dim:"#b36200",dark:"#3d1e00"},yellow:{accent:"#ffe600",dim:"#b3a000",dark:"#3d3600"}};
 function applyTheme(name){const t=THEMES[name]||THEMES.green,r=document.documentElement.style;r.setProperty("--accent",t.accent);r.setProperty("--accent-dim",t.dim);r.setProperty("--accent-dark",t.dark);document.querySelectorAll(".cswatch").forEach(s=>s.classList.toggle("active",s.dataset.color===name))}
 document.querySelectorAll(".cswatch").forEach(s=>s.addEventListener("click",()=>applyTheme(s.dataset.color)));
