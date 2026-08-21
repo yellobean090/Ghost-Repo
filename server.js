@@ -4,6 +4,9 @@ const fs = require("fs");
 const path = require("path");
 
 const PORT = Number(process.env.PORT) || 3001;
+const MAX_CONSECUTIVE_FAILURES = 3;
+let failedAuthAttempts = 0;
+let authLocked = false;
 
 const USERS = {
   ghost_alpha: { pass: "alpha@7749", alias: "ALPHA" },
@@ -52,13 +55,6 @@ function sendTo(ws, obj) {
   if (ws.readyState === 1) ws.send(JSON.stringify(obj));
 }
 
-function clearSessionIfEmpty() {
-  if (Object.keys(connected).length === 0) {
-    // No messages are persisted anywhere, so an empty connection set means
-    // there is no server-side conversation state to retain.
-  }
-}
-
 wss.on("connection", (ws) => {
   ws.username = null;
   ws.alias = null;
@@ -72,14 +68,41 @@ wss.on("connection", (ws) => {
     }
 
     if (msg.type === "auth") {
+      if (authLocked) {
+        sendTo(ws, {
+          type: "auth_fail",
+          reason: "GHOST SERVER LOCKED. Restart the server to enable authentication again.",
+        });
+        return;
+      }
+
       const username = typeof msg.username === "string" ? msg.username : "";
       const password = typeof msg.password === "string" ? msg.password : "";
       const user = USERS[username];
 
       if (!user || user.pass !== password) {
-        sendTo(ws, { type: "auth_fail", reason: "Invalid credentials." });
+        failedAuthAttempts += 1;
+
+        if (failedAuthAttempts >= MAX_CONSECUTIVE_FAILURES) {
+          authLocked = true;
+          failedAuthAttempts = 0;
+          sendTo(ws, {
+            type: "auth_fail",
+            reason: "GHOST SERVER LOCKED after 3 consecutive failed login attempts. Restart the server to unlock.",
+          });
+          return;
+        }
+
+        const remaining = MAX_CONSECUTIVE_FAILURES - failedAuthAttempts;
+        sendTo(ws, {
+          type: "auth_fail",
+          reason: `Invalid credentials. ${remaining} attempt${remaining === 1 ? "" : "s"} remaining before the server locks.`,
+        });
         return;
       }
+
+      // A successful authentication breaks the consecutive-failure sequence.
+      failedAuthAttempts = 0;
 
       if (connected[username]) {
         sendTo(ws, { type: "auth_fail", reason: "Already connected from another session." });
@@ -151,7 +174,6 @@ wss.on("connection", (ws) => {
       delete connected[username];
     }
 
-    clearSessionIfEmpty();
     broadcastSystem(`${alias} has disconnected.`);
   });
 
