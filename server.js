@@ -3,20 +3,24 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 
-const PORT = process.env.PORT || 3001;
+const PORT = Number(process.env.PORT) || 3001;
 
 const USERS = {
   ghost_alpha: { pass: "alpha@7749", alias: "ALPHA" },
-  ghost_beta:  { pass: "beta@3382",  alias: "BETA"  },
+  ghost_beta: { pass: "beta@3382", alias: "BETA" },
 };
 
 const server = http.createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Cache-Control", "no-store");
 
   if (req.url === "/ping") {
-    res.writeHead(200);
+    res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
     res.end("GHOST SERVER ONLINE");
-  } else if (req.url === "/" || req.url === "/index.html") {
+    return;
+  }
+
+  if (req.url === "/" || req.url === "/index.html") {
     const filePath = path.join(__dirname, "index.html");
     fs.readFile(filePath, (err, data) => {
       if (err) {
@@ -24,26 +28,25 @@ const server = http.createServer((req, res) => {
         res.end("Could not load index.html");
         return;
       }
-      res.writeHead(200, { "Content-Type": "text/html" });
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
       res.end(data);
     });
-  } else {
-    res.writeHead(404);
-    res.end();
+    return;
   }
+
+  res.writeHead(404);
+  res.end();
 });
 
 const wss = new WebSocketServer({ server });
+const connected = Object.create(null);
 
-// track connected authenticated clients: username -> ws
-const connected = {};
-
-function broadcast(fromAlias, text, excludeWs = null) {
-  const payload = JSON.stringify({ type: "msg", alias: fromAlias, text, ts: Date.now() });
+// Messages are intentionally never stored. They exist only in the browser DOM
+// while a client is connected and in transit through the WebSocket connection.
+function broadcastSystem(text, excludeWs = null) {
+  const payload = JSON.stringify({ type: "sys", text });
   for (const ws of Object.values(connected)) {
-    if (ws !== excludeWs && ws.readyState === 1) {
-      ws.send(payload);
-    }
+    if (ws !== excludeWs && ws.readyState === 1) ws.send(payload);
   }
 }
 
@@ -51,34 +54,48 @@ function sendTo(ws, obj) {
   if (ws.readyState === 1) ws.send(JSON.stringify(obj));
 }
 
+function clearSessionIfEmpty() {
+  if (Object.keys(connected).length === 0) {
+    // There is deliberately no message/session history to delete.
+    // Keeping this function explicit prevents future code from accidentally
+    // introducing persistent chat storage without revisiting the privacy rule.
+  }
+}
+
 wss.on("connection", (ws) => {
   ws.username = null;
-  console.log("[+] New connection");
+  ws.alias = null;
 
   ws.on("message", (raw) => {
     let msg;
-    try { msg = JSON.parse(raw); } catch { return; }
+    try {
+      msg = JSON.parse(raw);
+    } catch {
+      return;
+    }
 
-    // AUTH
     if (msg.type === "auth") {
-      const user = USERS[msg.username];
-      if (!user || user.pass !== msg.password) {
+      const username = typeof msg.username === "string" ? msg.username : "";
+      const password = typeof msg.password === "string" ? msg.password : "";
+      const user = USERS[username];
+
+      if (!user || user.pass !== password) {
         sendTo(ws, { type: "auth_fail", reason: "Invalid credentials." });
         return;
       }
-      if (connected[msg.username]) {
+
+      if (connected[username]) {
         sendTo(ws, { type: "auth_fail", reason: "Already connected from another session." });
         return;
       }
-      ws.username = msg.username;
+
+      ws.username = username;
       ws.alias = user.alias;
-      connected[msg.username] = ws;
+      connected[username] = ws;
 
       sendTo(ws, { type: "auth_ok", alias: user.alias });
-      console.log(`[AUTH] ${user.alias} connected`);
 
-      // notify the other person if online
-      const other = Object.keys(connected).find(u => u !== msg.username);
+      const other = Object.keys(connected).find((u) => u !== username);
       if (other) {
         sendTo(connected[other], { type: "sys", text: `${user.alias} has joined the session.` });
         sendTo(ws, { type: "sys", text: `${USERS[other].alias} is already here.` });
@@ -88,50 +105,67 @@ wss.on("connection", (ws) => {
       return;
     }
 
+    if (!ws.username) return;
 
-    // TYPING
     if (msg.type === "typing") {
-      if (!ws.username) return;
-      // relay to the other connected user
-      for (const [uname, sock] of Object.entries(connected)) {
-        if (uname !== ws.username && sock.readyState === 1) {
-          sendTo(sock, { type: "typing", alias: ws.alias, active: !!msg.active });
-        }
-      }
-    }
-    // TYPING
-    if (msg.type === "typing") {
-      if (!ws.username) return;
-      const payload = JSON.stringify({ type: "typing", alias: ws.alias, typing: msg.typing });
-      for (const [uname, client] of Object.entries(connected)) {
-        if (uname !== ws.username && client.readyState === 1) {
-          client.send(payload);
+      const payload = {
+        type: "typing",
+        alias: ws.alias,
+        typing: !!msg.typing,
+      };
+
+      for (const [username, client] of Object.entries(connected)) {
+        if (username !== ws.username && client.readyState === 1) {
+          client.send(JSON.stringify(payload));
         }
       }
       return;
     }
 
-    // CHAT
     if (msg.type === "chat") {
-      if (!ws.username) return;
-      console.log(`[MSG] ${ws.alias}: ${msg.text}`);
-      // echo back to sender with confirmation
-      sendTo(ws, { type: "msg_sent", alias: ws.alias, text: msg.text, ts: Date.now() });
-      // send to everyone else
-      broadcast(ws.alias, msg.text, ws);
+      const text = typeof msg.text === "string" ? msg.text.trim() : "";
+      if (!text || text.length > 2000) return;
+
+      // Do not log or persist message content on the server.
+      sendTo(ws, { type: "msg_sent" });
+
+      const payload = JSON.stringify({
+        type: "msg",
+        alias: ws.alias,
+        text,
+        ts: Date.now(),
+      });
+
+      for (const [username, client] of Object.entries(connected)) {
+        if (username !== ws.username && client.readyState === 1) {
+          client.send(payload);
+        }
+      }
+      return;
     }
   });
 
   ws.on("close", () => {
-    if (ws.username) {
-      delete connected[ws.username];
-      console.log(`[-] ${ws.alias} disconnected`);
-      broadcast("SYS", `${ws.alias} has left the session.`);
+    if (!ws.username) return;
+
+    const username = ws.username;
+    const alias = ws.alias;
+
+    if (connected[username] === ws) {
+      delete connected[username];
     }
+
+    // When the second/last participant leaves, the in-memory connection map
+    // becomes empty. Since no messages are persisted, the conversation is gone.
+    clearSessionIfEmpty();
+    broadcastSystem(`${alias} has left the session.`);
+  });
+
+  ws.on("error", () => {
+    // Avoid writing chat content or credentials to server logs.
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`\n  GHOST SERVER running on port ${PORT}`);
-  console.log(`  Waiting for connections...\n`);
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`GHOST SERVER running on port ${PORT}`);
 });
