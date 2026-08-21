@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: ghost-terminal
+    runtime: node
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /ping
