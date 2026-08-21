@@ -8,75 +8,63 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --accent:#00ff41;--accent-dim:#00b32d;--accent-dark:#003d0f;
-    --amber:#ffb700;--red:#ff3232;--bg:#0a0a0a;--border:#1a3d1a;
-  }
-  html,body{height:100%;background:#000;color:var(--accent);font-family:'Share Tech Mono',monospace;overflow:hidden}
-  body{-webkit-text-size-adjust:100%;touch-action:manipulation}
-  #root{display:flex;flex-direction:column;height:100dvh;min-height:100%;background:var(--bg);border:1px solid var(--accent-dark);position:relative}
-  #scanlines{position:absolute;inset:0;pointer-events:none;z-index:10;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px)}
-  #titlebar{background:#0d1a0d;border-bottom:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;min-height:38px}
-  .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}.dot.r{background:#ff3b30}.dot.y{background:#febc2e}.dot.g{background:#28c840}
-  #titlebar span{flex:1;text-align:center;font-size:11px;color:var(--accent-dim);letter-spacing:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  #colorbar{background:#060d06;border-bottom:1px solid var(--border);padding:6px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
-  #colorbar label{font-size:10px;color:#2a5a2a;letter-spacing:1px}.cswatch{width:16px;height:16px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border-color .15s}.cswatch.active,.cswatch:hover{border-color:#fff}
-  #screen{flex:1;min-height:0;padding:14px 16px;overflow-y:auto;font-size:13px;line-height:1.7;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
-  #screen::-webkit-scrollbar{width:4px}#screen::-webkit-scrollbar-thumb{background:var(--accent-dark)}
-  .line{margin:1px 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;animation:fi .2s ease}@keyframes fi{from{opacity:0;transform:translateX(-3px)}to{opacity:1;transform:none}}
-  .sys{color:var(--accent-dim)}.err{color:var(--red)}.warn{color:var(--amber)}.me{color:var(--accent)}.them{color:#7fff7f}.dim{color:#1e3d1e}.info{color:#00ccff}.srv{color:#888}
-  #typing-indicator{min-height:18px;padding:0 16px 2px;font-size:11px;color:var(--accent-dim);letter-spacing:1px;flex-shrink:0;transition:opacity .2s}#typing-indicator.hidden{opacity:0}
-  #inputbar{border-top:1px solid var(--border);background:#0d1a0d;padding:10px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0;padding-bottom:max(10px,env(safe-area-inset-bottom))}
-  #prompt{color:var(--accent-dim);font-size:13px;white-space:nowrap;min-width:fit-content}#cmd{min-width:0;flex:1;background:transparent;border:none;outline:none;color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:16px;caret-color:var(--accent)}#cmd:disabled{opacity:.4}
-  #statusbar{border-top:1px solid var(--border);background:#060d06;padding:5px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:10px;color:#2a5a2a;flex-shrink:0}.led{width:6px;height:6px;border-radius:50%;background:#2a5a2a;display:inline-block;margin-right:5px}.led.on{background:var(--accent)}.led.warn{background:var(--amber)}.led.err{background:var(--red)}
-  @media(max-width:600px){
-    #root{border:0}
-    #titlebar{padding:7px 10px}.dot{width:8px;height:8px}.titlebar{}
-    #titlebar span{font-size:9px;letter-spacing:1px}
-    #colorbar{padding:7px 10px;gap:9px}.cswatch{width:18px;height:18px}
-    #screen{padding:10px 11px;font-size:12px;line-height:1.65}
-    #typing-indicator{padding-left:11px;font-size:10px}
-    #inputbar{padding:9px 10px;gap:7px}
-    #prompt{font-size:11px;max-width:42vw;overflow:hidden;text-overflow:ellipsis}
-    #cmd{font-size:16px}
-    #statusbar{padding:5px 10px;font-size:9px}.status-extra{display:none}
-  }
-  @media(max-width:380px){#titlebar span{font-size:8px}#colorbar label{display:none}#prompt{max-width:35vw}}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--accent:#00ff41;--accent-dim:#00b32d;--accent-dark:#003d0f;--amber:#ffb700;--red:#ff3232;--bg:#0a0a0a;--border:#1a3d1a}
+html,body{height:100%;background:#000;color:var(--accent);font-family:'Share Tech Mono',monospace;overflow:hidden}
+body{-webkit-text-size-adjust:100%;touch-action:manipulation}
+#root{display:flex;flex-direction:column;height:100dvh;min-height:100%;background:var(--bg);border:1px solid var(--accent-dark);position:relative}
+#scanlines{position:absolute;inset:0;pointer-events:none;z-index:10;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px)}
+#titlebar{background:#0d1a0d;border-bottom:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;min-height:38px}
+.dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}.dot.r{background:#ff3b30}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+#titlebar span{flex:1;text-align:center;font-size:11px;color:var(--accent-dim);letter-spacing:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#logout{border:1px solid var(--border);background:transparent;color:var(--accent-dim);width:30px;height:28px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:15px;line-height:1;display:none;align-items:center;justify-content:center;padding:0}#logout:hover{color:var(--red);border-color:var(--red)}
+#colorbar{background:#060d06;border-bottom:1px solid var(--border);padding:6px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+#colorbar label{font-size:10px;color:#2a5a2a;letter-spacing:1px}.cswatch{width:16px;height:16px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border-color .15s}.cswatch.active,.cswatch:hover{border-color:#fff}
+#screen{flex:1;min-height:0;padding:14px 16px;overflow-y:auto;font-size:13px;line-height:1.7;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+#screen::-webkit-scrollbar{width:4px}#screen::-webkit-scrollbar-thumb{background:var(--accent-dark)}
+.line{margin:1px 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;animation:fi .2s ease}@keyframes fi{from{opacity:0;transform:translateX(-3px)}to{opacity:1;transform:none}}
+.sys{color:var(--accent-dim)}.err{color:var(--red)}.warn{color:var(--amber)}.me{color:var(--accent)}.them{color:#7fff7f}.dim{color:#1e3d1e}.info{color:#00ccff}.srv{color:#888}
+#typing-indicator{min-height:18px;padding:0 16px 2px;font-size:11px;color:var(--accent-dim);letter-spacing:1px;flex-shrink:0;transition:opacity .2s}#typing-indicator.hidden{opacity:0}
+#inputbar{border-top:1px solid var(--border);background:#0d1a0d;padding:10px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0;padding-bottom:max(10px,env(safe-area-inset-bottom))}
+#prompt{color:var(--accent-dim);font-size:13px;white-space:nowrap;min-width:fit-content}#cmd{min-width:0;flex:1;background:transparent;border:none;outline:none;color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:16px;caret-color:var(--accent)}#cmd:disabled{opacity:.4}
+#statusbar{border-top:1px solid var(--border);background:#060d06;padding:5px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:10px;color:#2a5a2a;flex-shrink:0}.led{width:6px;height:6px;border-radius:50%;background:#2a5a2a;display:inline-block;margin-right:5px}.led.on{background:var(--accent)}.led.warn{background:var(--amber)}.led.err{background:var(--red)}
+@media(max-width:600px){#root{border:0}#titlebar{padding:7px 10px}.dot{width:8px;height:8px}#titlebar span{font-size:9px;letter-spacing:1px}#logout{width:28px;height:27px;font-size:14px}#colorbar{padding:7px 10px;gap:9px}.cswatch{width:18px;height:18px}#screen{padding:10px 11px;font-size:12px;line-height:1.65}#typing-indicator{padding-left:11px;font-size:10px}#inputbar{padding:9px 10px;gap:7px}#prompt{font-size:11px;max-width:42vw;overflow:hidden;text-overflow:ellipsis}#cmd{font-size:16px}#statusbar{padding:5px 10px;font-size:9px}.status-extra{display:none}}
+@media(max-width:380px){#titlebar span{font-size:8px}#colorbar label{display:none}#prompt{max-width:35vw}}
 </style>
 </head>
 <body>
 <div id="root">
-  <div id="scanlines"></div>
-  <div id="titlebar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span>GHOST TERMINAL v2.1 — LIVE RELAY</span></div>
-  <div id="colorbar"><label>THEME:</label><div class="cswatch active" data-color="green" title="Green" style="background:#00ff41"></div><div class="cswatch" data-color="red" title="Red" style="background:#ff3232"></div><div class="cswatch" data-color="pink" title="Pink" style="background:#ff69b4"></div><div class="cswatch" data-color="blue" title="Blue" style="background:#00bfff"></div><div class="cswatch" data-color="orange" title="Orange" style="background:#ff8c00"></div><div class="cswatch" data-color="yellow" title="Yellow" style="background:#ffe600"></div></div>
-  <div id="screen"></div>
-  <div id="typing-indicator" class="hidden"></div>
-  <div id="inputbar"><span id="prompt">ghost:~$</span><input id="cmd" autocomplete="off" autocorrect="off" spellcheck="false" /></div>
-  <div id="statusbar"><span><span class="led" id="led"></span><span id="status-txt">OFFLINE</span></span><span id="clock"></span><span class="status-extra">EPHEMERAL · NO SERVER LOGS</span></div>
+<div id="scanlines"></div>
+<div id="titlebar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span>GHOST TERMINAL v2.1 — LIVE RELAY</span><button id="logout" title="Log out and clear chat" aria-label="Log out and clear chat">↪</button></div>
+<div id="colorbar"><label>THEME:</label><div class="cswatch active" data-color="green" title="Green" style="background:#00ff41"></div><div class="cswatch" data-color="red" title="Red" style="background:#ff3232"></div><div class="cswatch" data-color="pink" title="Pink" style="background:#ff69b4"></div><div class="cswatch" data-color="blue" title="Blue" style="background:#00bfff"></div><div class="cswatch" data-color="orange" title="Orange" style="background:#ff8c00"></div><div class="cswatch" data-color="yellow" title="Yellow" style="background:#ffe600"></div></div>
+<div id="screen"></div>
+<div id="typing-indicator" class="hidden"></div>
+<div id="inputbar"><span id="prompt">ghost:~$</span><input id="cmd" autocomplete="off" autocorrect="off" spellcheck="false" /></div>
+<div id="statusbar"><span><span class="led" id="led"></span><span id="status-txt">OFFLINE</span></span><span id="clock"></span><span class="status-extra">EPHEMERAL · NO SERVER LOGS</span></div>
 </div>
 <script>
-const DEFAULT_SERVER = "wss://ghost-relay-r3a6.onrender.com";
+const DEFAULT_SERVER="wss://ghost-relay-r3a6.onrender.com";
 const THEMES={green:{accent:"#00ff41",dim:"#00b32d",dark:"#003d0f"},red:{accent:"#ff3232",dim:"#b32020",dark:"#3d0000"},pink:{accent:"#ff69b4",dim:"#c2487e",dark:"#3d0020"},blue:{accent:"#00bfff",dim:"#0080b3",dark:"#00233d"},orange:{accent:"#ff8c00",dim:"#b36200",dark:"#3d1e00"},yellow:{accent:"#ffe600",dim:"#b3a000",dark:"#3d3600"}};
-function applyTheme(name){const t=THEMES[name]||THEMES.green,r=document.documentElement.style;r.setProperty("--accent",t.accent);r.setProperty("--accent-dim",t.dim);r.setProperty("--accent-dark",t.dark);document.querySelectorAll(".cswatch").forEach(s=>s.classList.toggle("active",s.dataset.color===name))}
-document.querySelectorAll(".cswatch").forEach(s=>s.addEventListener("click",()=>applyTheme(s.dataset.color)));
-const screen=document.getElementById('screen'),cmdEl=document.getElementById('cmd'),prompt=document.getElementById('prompt'),led=document.getElementById('led'),stTxt=document.getElementById('status-txt'),clock=document.getElementById('clock'),typingEl=document.getElementById('typing-indicator');
+function applyTheme(name){const t=THEMES[name]||THEMES.green,r=document.documentElement.style;r.setProperty("--accent",t.accent);r.setProperty("--accent-dim",t.dim);r.setProperty("--accent-dark",t.dark);document.querySelectorAll(".cswatch").forEach(s=>s.classList.toggle("active",s.dataset.color===name))}document.querySelectorAll(".cswatch").forEach(s=>s.addEventListener("click",()=>applyTheme(s.dataset.color)));
+const screen=document.getElementById('screen'),cmdEl=document.getElementById('cmd'),prompt=document.getElementById('prompt'),led=document.getElementById('led'),stTxt=document.getElementById('status-txt'),clock=document.getElementById('clock'),typingEl=document.getElementById('typing-indicator'),logoutBtn=document.getElementById('logout');
 let ws=null,state="setup",pendingUser=null,myAlias=null,inputLocked=false,typingTimeout=null,partnerTimeout=null;
 setInterval(()=>clock.textContent=new Date().toUTCString().replace('GMT','UTC'),1000);
 function setLed(mode){led.className='led'+(mode?' '+mode:'')}function setStatus(txt,mode=""){stTxt.textContent=txt;setLed(mode)}
 function print(text,cls="line",prepend=""){const d=document.createElement('div');d.className='line '+(cls||'');d.textContent=prepend+text;screen.appendChild(d);screen.scrollTop=screen.scrollHeight;return d}
 function ts(){return new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'})}
 function lock(){inputLocked=true;cmdEl.disabled=true}function unlock(){inputLocked=false;cmdEl.disabled=false;cmdEl.focus()}
-function showPartnerTyping(alias){typingEl.textContent=alias+" is typing...";typingEl.classList.remove("hidden");clearTimeout(partnerTimeout);partnerTimeout=setTimeout(hidePartnerTyping,3000)}
-function hidePartnerTyping(){typingEl.classList.add("hidden");clearTimeout(partnerTimeout)}
+function showPartnerTyping(alias){typingEl.textContent=alias+" is typing...";typingEl.classList.remove("hidden");clearTimeout(partnerTimeout);partnerTimeout=setTimeout(hidePartnerTyping,3000)}function hidePartnerTyping(){typingEl.classList.add("hidden");clearTimeout(partnerTimeout)}
 function sendTyping(){if(!ws||ws.readyState!==1||state!=="chat")return;ws.send(JSON.stringify({type:"typing",typing:true}));clearTimeout(typingTimeout);typingTimeout=setTimeout(()=>{if(ws&&ws.readyState===1)ws.send(JSON.stringify({type:"typing",typing:false}))},1200)}
-(function boot(){print(""," ");print("  ░██████╗░██╗  ██╗░█████╗░░██████╗████████╗","dim");print("  ██╔════╝░██║  ██║██╔══██╗██╔════╝╚══██╔══╝","dim");print("  ██║░░██╗░███████║██║░░██║╚█████╗░░░░██║░░░","me");print("  ██║░░╚██╗██╔══██║██║░░██║░╚═══██╗░░░██║░░░","me");print("  ╚██████╔╝██║  ██║╚█████╔╝██████╔╝░░░██║░░░","dim");print("  ░╚═════╝░╚═╝  ╚═╝░╚════╝ ╚═════╝ ░░░╚═╝░░░","dim");print("","");print("  ANONYMOUS RELAY TERMINAL  v2.1  LIVE MODE","sys");print("  Messages are never stored by the relay.","sys");print("","");if(DEFAULT_SERVER){print("  Relay configured: "+DEFAULT_SERVER,"sys");print("","");connectToServer(DEFAULT_SERVER)}else{print("  No relay configured.","warn");state="setup";prompt.textContent="server-url:";cmdEl.placeholder="paste your wss:// URL here";unlock()}})();
-function connectToServer(url){lock();setStatus("CONNECTING...","warn");print("  Connecting to relay...","sys");try{ws=new WebSocket(url)}catch(e){print("  Invalid URL: "+e.message,"err");state="setup";prompt.textContent="server-url:";unlock();return}
+function resetToLogin(clear=true){if(ws){try{ws.close()}catch{}}ws=null;hidePartnerTyping();if(clear)screen.innerHTML='';myAlias=null;pendingUser=null;state="setup";prompt.textContent="server-url:";cmdEl.type="text";cmdEl.placeholder="paste your wss:// URL";logoutBtn.style.display="none";setStatus("OFFLINE");unlock()}
+function logoutAndClear(){if(state!=="chat")return;print("  ⬡ You logged out and cleared this chat.","srv");resetToLogin(true);print("  Ghost session cleared. Connect again to log in.","sys")}
+logoutBtn.addEventListener('click',logoutAndClear);
+(function boot(){print(""," ");print("  ░██████╗░██╗  ██╗░█████╗░░██████╗████████╗","dim");print("  ██╔════╝░██║  ██║██╔══██╗██╔════╝╚══██╔══╝","dim");print("  ██║░░██╗░███████║██║░░██║╚█████╗░░░░██║░░░","me");print("  ██║░░╚██╗██╔══██║██║░░██║░╚═══██╗░░░██║░░░","me");print("  ╚██████╔╝██║  ██║╚█████╔╝██████╔╝░░░██║░░░","dim");print("  ░╚═════╝░╚═╝  ╚═╝░╚════╝ ╚═════╝ ░░░╚═╝░░░","dim");print("","");print("  ANONYMOUS RELAY TERMINAL  v2.1  LIVE MODE","sys");print("  Messages are never stored by the relay.","sys");print("","");print("  Relay configured: "+DEFAULT_SERVER,"sys");print("","");connectToServer(DEFAULT_SERVER)})();
+function connectToServer(url){lock();setStatus("CONNECTING...","warn");print("  Connecting to relay...","sys");try{ws=new WebSocket(url)}catch(e){print("  Invalid URL: "+e.message,"err");resetToLogin(false);return}
 ws.onopen=()=>{setStatus("RELAY REACHED","warn");print("  Relay connected. Enter your username.","sys");print("  Users: ghost_alpha · ghost_beta","warn");print("","");state="auth_user";prompt.textContent="login:";cmdEl.placeholder="username";unlock()};
-ws.onmessage=e=>{let msg;try{msg=JSON.parse(e.data)}catch{return}if(msg.type==="auth_ok"){myAlias=msg.alias;setStatus("AUTHENTICATED · "+myAlias,"warn");state="chat";prompt.textContent=myAlias+"@ghost:~$";cmdEl.placeholder="type a message...";cmdEl.type="text";print("  ✓ Identity verified — you are: "+myAlias,"info");unlock()}else if(msg.type==="auth_fail"){print("  ✗ AUTH FAILED: "+msg.reason,"err");state="auth_user";prompt.textContent="login:";cmdEl.type="text";cmdEl.placeholder="username";unlock()}else if(msg.type==="sys"){print("  ⬡ "+msg.text,"srv");if(msg.text.includes("joined")||msg.text.includes("already here"))setStatus("CONNECTED · "+myAlias+" · partner online","on");if(msg.text.includes("left")){setStatus("CONNECTED · "+myAlias+" · partner offline","warn");hidePartnerTyping()}}else if(msg.type==="msg"){hidePartnerTyping();print(`[${ts()}] <${msg.alias}> ${msg.text}`,"them")}else if(msg.type==="typing"){if(msg.typing)showPartnerTyping(msg.alias);else hidePartnerTyping()}};
-ws.onclose=()=>{setStatus("DISCONNECTED","err");if(state==="chat")print("  [CONNECTION LOST — session terminated]","err");hidePartnerTyping();state="setup";ws=null;prompt.textContent="server-url:";cmdEl.placeholder="paste your wss:// URL";unlock()};ws.onerror=()=>print("  [RELAY ERROR — check relay status]","err")}
+ws.onmessage=e=>{let msg;try{msg=JSON.parse(e.data)}catch{return}if(msg.type==="auth_ok"){myAlias=msg.alias;logoutBtn.style.display="flex";setStatus("AUTHENTICATED · "+myAlias,"warn");state="chat";prompt.textContent=myAlias+"@ghost:~$";cmdEl.placeholder="type a message...";cmdEl.type="text";print("  ✓ Identity verified — you are: "+myAlias,"info");unlock()}else if(msg.type==="auth_fail"){print("  ✗ AUTH FAILED: "+msg.reason,"err");state="auth_user";prompt.textContent="login:";cmdEl.type="text";cmdEl.placeholder="username";unlock()}else if(msg.type==="sys"){print("  ⬡ "+msg.text,"srv");if(msg.text.includes("joined")||msg.text.includes("already here"))setStatus("CONNECTED · "+myAlias+" · partner online","on");if(msg.text.includes("disconnected")){setStatus("CONNECTED · "+myAlias+" · partner offline","warn");hidePartnerTyping()}}else if(msg.type==="msg"){hidePartnerTyping();print(`[${ts()}] <${msg.alias}> ${msg.text}`,"them")}else if(msg.type==="typing"){if(msg.typing)showPartnerTyping(msg.alias);else hidePartnerTyping()}};
+ws.onclose=()=>{if(state==="chat")print("  [CONNECTION LOST — session terminated]","err");setStatus("DISCONNECTED","err");hidePartnerTyping();state="setup";ws=null;myAlias=null;logoutBtn.style.display="none";prompt.textContent="server-url:";cmdEl.placeholder="paste your wss:// URL";unlock()};ws.onerror=()=>print("  [RELAY ERROR — check relay status]","err")}
 cmdEl.addEventListener('input',()=>{if(state==="chat")sendTyping()});
-cmdEl.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const val=cmdEl.value.trim();cmdEl.value='';if(!val||inputLocked)return;if(state==="setup"){const url=val.startsWith("wss://")||val.startsWith("ws://")?val:"wss://"+val;connectToServer(url);return}if(state==="auth_user"){pendingUser=val;state="auth_pass";prompt.textContent="password:";cmdEl.type="password";cmdEl.placeholder="passphrase";print("  Sending credentials...","sys");return}if(state==="auth_pass"){cmdEl.type="text";if(!ws||ws.readyState!==1){print("  [NOT CONNECTED]","err");state="setup";prompt.textContent="server-url:";return}ws.send(JSON.stringify({type:"auth",username:pendingUser,password:val}));pendingUser=null;return}if(state==="chat"){clearTimeout(typingTimeout);if(ws&&ws.readyState===1)ws.send(JSON.stringify({type:"typing",typing:false}));if(val==="/quit"){ws&&ws.close();screen.innerHTML='';setStatus("OFFLINE");state="setup";prompt.textContent="server-url:";cmdEl.placeholder="paste your wss:// URL";unlock();return}if(val==="/clear"){screen.innerHTML='';return}if(val.startsWith("/")){print("  Commands: /quit  /clear","warn");return}if(!ws||ws.readyState!==1){print("  [NOT CONNECTED — reconnect first]","err");return}ws.send(JSON.stringify({type:"chat",text:val}));print(`[${ts()}] <${myAlias}> ${val}`,"me")}});
+cmdEl.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const val=cmdEl.value.trim();cmdEl.value='';if(!val||inputLocked)return;if(state==="setup"){const url=val.startsWith("wss://")||val.startsWith("ws://")?val:"wss://"+val;connectToServer(url);return}if(state==="auth_user"){pendingUser=val;state="auth_pass";prompt.textContent="password:";cmdEl.type="password";cmdEl.placeholder="passphrase";print("  Sending credentials...","sys");return}if(state==="auth_pass"){cmdEl.type="text";if(!ws||ws.readyState!==1){print("  [NOT CONNECTED]","err");state="setup";prompt.textContent="server-url:";return}ws.send(JSON.stringify({type:"auth",username:pendingUser,password:val}));pendingUser=null;return}if(state==="chat"){clearTimeout(typingTimeout);if(ws&&ws.readyState===1)ws.send(JSON.stringify({type:"typing",typing:false}));if(val==="/quit"){resetToLogin(true);return}if(val==="/clear"){screen.innerHTML='';return}if(val.startsWith("/")){print("  Commands: /quit  /clear","warn");return}if(!ws||ws.readyState!==1){print("  [NOT CONNECTED — reconnect first]","err");return}ws.send(JSON.stringify({type:"chat",text:val}));print(`[${ts()}] <${myAlias}> ${val}`,"me")}});
 window.addEventListener('beforeunload',()=>{if(ws)ws.close()});
 </script>
 </body>
