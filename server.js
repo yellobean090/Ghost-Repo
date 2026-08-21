@@ -41,8 +41,6 @@ const server = http.createServer((req, res) => {
 const wss = new WebSocketServer({ server });
 const connected = Object.create(null);
 
-// Messages are intentionally never stored. They exist only in the browser DOM
-// while a client is connected and in transit through the WebSocket connection.
 function broadcastSystem(text, excludeWs = null) {
   const payload = JSON.stringify({ type: "sys", text });
   for (const ws of Object.values(connected)) {
@@ -56,9 +54,8 @@ function sendTo(ws, obj) {
 
 function clearSessionIfEmpty() {
   if (Object.keys(connected).length === 0) {
-    // There is deliberately no message/session history to delete.
-    // Keeping this function explicit prevents future code from accidentally
-    // introducing persistent chat storage without revisiting the privacy rule.
+    // No messages are persisted anywhere, so an empty connection set means
+    // there is no server-side conversation state to retain.
   }
 }
 
@@ -126,7 +123,6 @@ wss.on("connection", (ws) => {
       const text = typeof msg.text === "string" ? msg.text.trim() : "";
       if (!text || text.length > 2000) return;
 
-      // Do not log or persist message content on the server.
       sendTo(ws, { type: "msg_sent" });
 
       const payload = JSON.stringify({
@@ -155,10 +151,8 @@ wss.on("connection", (ws) => {
       delete connected[username];
     }
 
-    // When the second/last participant leaves, the in-memory connection map
-    // becomes empty. Since no messages are persisted, the conversation is gone.
     clearSessionIfEmpty();
-    broadcastSystem(`${alias} has left the session.`);
+    broadcastSystem(`${alias} has disconnected.`);
   });
 
   ws.on("error", () => {
