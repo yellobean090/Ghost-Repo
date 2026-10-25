@@ -12,7 +12,6 @@
 
 ## Preview
 
-> Replace these image links with actual screenshots of your website.
 
 ### Terminal Interface
 
